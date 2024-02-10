@@ -151,7 +151,8 @@ def AdminActual(mystic):
             except:
                 return
             if member.status != ChatMemberStatus.ADMINISTRATOR:
-                return await message.reply(_["general_4"])
+                if not member.privileges.can_manage_video_chats:
+                    return await message.reply(_["general_4"])
         return await mystic(client, message, _)
 
     return wrapper
@@ -182,17 +183,18 @@ def ActualAdminCB(mystic):
             except:
                 return await CallbackQuery.answer(_["general_4"], show_alert=True)
             if a.status != ChatMemberStatus.ADMINISTRATOR:
-                if CallbackQuery.from_user.id not in SUDOERS:
-                    token = await int_to_alpha(CallbackQuery.from_user.id)
-                    _check = await get_authuser_names(CallbackQuery.from_user.id)
-                    if token not in _check:
-                        try:
-                            return await CallbackQuery.answer(
-                                _["general_4"],
-                                show_alert=True,
-                            )
-                        except:
-                            return
+                if not a.privileges.can_manage_video_chats:
+                    if CallbackQuery.from_user.id not in SUDOERS:
+                        token = await int_to_alpha(CallbackQuery.from_user.id)
+                        _check = await get_authuser_names(CallbackQuery.from_user.id)
+                        if token not in _check:
+                            try:
+                                return await CallbackQuery.answer(
+                                    _["general_4"],
+                                    show_alert=True,
+                                )
+                            except:
+                                return
         return await mystic(client, CallbackQuery, _)
 
     return wrapper
